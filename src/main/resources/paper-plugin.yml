@@ -1,0 +1,38 @@
+name: FXItems
+depend: [EntitySize]
+version: 'Beta | Build 1.0'
+main: com.noctify.Main.FXItems
+api-version: '1.21'
+authors: [ zfxm ]
+commands:
+  fxreload:
+    description: Reloads the plugin configuration.
+    permission: fxitems.op
+  fxgive:
+    description: Gives a Custom item to the player.
+    permission: fxitems.op
+  nv:
+    description: Toggles night vision.
+    usage: /nv
+    permission: fxitems.nightvision
+  nightvision:
+    description: Toggles night vision.
+    usage: /nightvision
+    permission: fxitems.nightvision
+  fxutils:
+    description: Utility Commands for players.
+    usage: /c-Utils <subcommand>
+    permission: fxitems.utils
+  ping:
+    description: A simple ping command.
+    usage: /ping
+permissions:
+  fxitems.nightvision:
+    description: Allows the player to toggle night vision.
+    default: true
+  fxitems.op:
+    description: Allows the player to give custom items.
+    default: op
+  fxitems.utils:
+    description: Allows the player to use utility commands.
+    default: false

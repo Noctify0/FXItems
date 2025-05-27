@@ -114,6 +114,34 @@ Every custom item/food/command/event is provided as a sample in its respective p
 
 ---
 
+## Dependencies
+
+FXItems requires the following dependencies to function correctly:
+
+### Required
+
+- **Spigot or PaperMC** (Minecraft server API)  
+  *FXItems is built for Spigot and compatible PaperMC servers. You must be running a Spigot or PaperMC-based server.*
+
+- **Java 17 or newer**  
+  *The plugin requires Java 17+ for compilation and runtime.*
+
+- **EntitySize**  
+  *Entity resizing features will not work without this (`EntitySizeUtils`). The plugin works fine without it, but those features will be disabled.*
+
+### Optional (for extended features)
+
+- **ModelEngine**  
+  *Required only if you want to use custom model projectiles with the ModelEngine API. If not installed, standard projectiles will be used instead.*
+
+- **PlaceholderAPI**  
+  *Required only if you use placeholders in your custom extensions or want integration with PlaceholderAPI.*
+
+> **Note:**  
+> **Core features** (custom items, foods, commands, events, and utilities) require only Spigot/PaperMC and Java 17+.
+
+---
+
 ## Creating Custom Content
 
 ### Custom Items

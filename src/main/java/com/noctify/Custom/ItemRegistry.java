@@ -27,7 +27,7 @@ public class ItemRegistry {
         // registerItem("item_name", NameOfItemAttributesClass.class);
         //
 
-
+        registerItem("example_item", ExampleItem.class);
 
         // --------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ public class ItemRegistry {
         // registerBehavior(plugin, "item_name", NameOfItemBehaviorClass.class);
         //
 
-
+        registerBehavior(plugin, "example_item", ExampleItemBehavior.class);
 
         // --------------------------------------------------------------------------
 
@@ -78,7 +78,7 @@ public class ItemRegistry {
         // addRecipe(plugin, ItemName.class);
         //
 
-
+        addRecipe(plugin, ExampleItem.class);
 
         // --------------------------------------------------------------------------
     }

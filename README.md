@@ -1,3 +1,6 @@
+## Wiki:
+- https://github.com/Noctify0/FXItems/wiki
+
 # FXItems Plugin
 
 FXItems is a modular, extensible Minecraft plugin for Spigot/Bukkit servers that allows you to create **custom items**, **foods**, **commands**, **events**, and **gameplay utilities** with ease. It is designed to be both user- and developer-friendly, providing a robust system for adding new content and customizing server gameplay.

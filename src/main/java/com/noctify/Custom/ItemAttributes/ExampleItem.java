@@ -67,6 +67,9 @@ public class ExampleItem {
         // OneTimeCraftUtils utils = new OneTimeCraftUtils(plugin);
         // utils.registerCraft("example_item", exampleItem);
 
+        OneTimeCraftUtils utils = new OneTimeCraftUtils(plugin);
+        utils.registerCraft("example_item", exampleItem);
+
         return recipe;
     }
 }

@@ -6,8 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 public class ExampleEvent extends Event implements Listener {
-
-    // This is required for all custom events to manage event handlers
+    // Required for all custom events to manage event handlers
     private static final HandlerList HANDLERS = new HandlerList();
 
     // The player involved in this event
@@ -16,10 +15,15 @@ public class ExampleEvent extends Event implements Listener {
     // A custom message for this event
     private final String message;
 
+    // No-argument constructor for registry
+    public ExampleEvent() {
+        this(null, null);
+    }
+
     // Constructor to create the event with a player and a message
     public ExampleEvent(Player player, String message) {
-        this.player = player; // Set the player
-        this.message = message; // Set the message
+        this.player = player;
+        this.message = message;
     }
 
     // Get the player who triggered the event

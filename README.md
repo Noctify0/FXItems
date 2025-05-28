@@ -153,33 +153,151 @@ To create a new custom item:
 ```java
 package com.noctify.Custom.ItemAttributes;
 
+import com.noctify.Main.Utils.OneTimeCraftUtils;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
-public class MyCustomSword {
+import java.util.Arrays;
+
+public class ExampleItem {
+
     public static ItemStack createItem() {
+
+        // Create the item name, lore and properties
+
         ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§aMy Epic Sword");
-        item.setItemMeta(meta);
+        if (meta != null) {
+            // Set the display name
+            meta.setDisplayName("§aExample Sword");
+            // Set the lore
+            meta.setLore(Arrays.asList(
+                    "§7A sword for demonstration purposes.",
+                    "",
+                    "§6ʟᴇɢᴇɴᴅᴀʀʏ",
+                    "§fAbilities:",
+                    "§fExample Power: §7Right Click to activate.",
+                    "§830s cooldown"
+            ));
+            // Set the item to be unbreakable
+            meta.setUnbreakable(true);
+            // Hide the unbreakable flag
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+
+            // Set a custom item model for the item
+            NamespacedKey modelKey = NamespacedKey.minecraft("example_sword");
+            meta.setItemModel(modelKey);
+            // Apply the custom attributes to the item
+            item.setItemMeta(meta);
+        }
         return item;
     }
-    // Optionally add getRecipe(), getLore(), etc.
+
+    // Create a crafting recipe for the item
+    public static ShapedRecipe getRecipe(Plugin plugin, NamespacedKey key) {
+        ItemStack exampleItem = createItem();
+        ShapedRecipe recipe = new ShapedRecipe(key, exampleItem);
+        // Define the shape of the recipe
+        recipe.shape(" E ", "DSD", " S ");
+        // Set the ingredients for the recipe
+        recipe.setIngredient('E', Material.EMERALD);
+        recipe.setIngredient('D', Material.DIAMOND_BLOCK);
+        recipe.setIngredient('S', Material.STICK);
+
+        // If you want the item to only be able to be crafted once, you can use the OneTimeCraftUtils
+        // This can especially be useful in competetive smp servers where you want to limit the number of powerful items
+        // Make sure to import the OneTimeCraftUtils class from the Main.Utils package
+        // import com.noctify.Main.Utils.OneTimeCraftUtils;
+        //
+        // Register the item as a one-time craftable item syntax:
+        // It does this will the following two lines:
+        //
+        // OneTimeCraftUtils utils = new OneTimeCraftUtils(plugin);
+        // utils.registerCraft("example_item", exampleItem);
+
+        return recipe;
+    }
 }
 ```
 
 2. **Register the Item in ItemRegistry**:
    In `ItemRegistry.initialize()`:
 ```java
-registerItem("MyCustomSword", MyCustomSword.class);
-addRecipe(plugin, MyCustomSword.class);
+registerItem("example_item", ExampleItem.class);
+addRecipe(plugin, ExampleItem.class);
 ```
 
 3. **(Optional) Add an Item Behavior**:
    Create a class in `com.noctify.Custom.ItemBehavior` and register it:
 ```java
 registerBehavior(plugin, "MyCustomSword", MyCustomSwordBehavior.class);
+```
+
+  Example Behavior:
+```java
+package com.noctify.Custom.ItemBehavior;
+
+import com.noctify.Main.Utils.CooldownUtils;
+import com.noctify.Main.Utils.CustomItemUtils;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+
+import java.util.UUID;
+
+public class ExampleItemBehavior implements Listener {
+
+    public ExampleItemBehavior(Plugin plugin) {
+        // Constructor must be present to register the listener
+        // Can be left blank
+    }
+
+    @EventHandler
+    public void onPlayerUseExampleItem(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = event.getItem();
+
+        // The next line checks if the item is a custom item with specific attributes,
+        // So the ability will only trigger for this specific item
+        // and not for any other item with the same material
+        // Read the syntax of the line to know how to use it
+
+        if (!CustomItemUtils.isCustomItem(item, Material.DIAMOND_SWORD, "&aExample Sword")) {
+            return;
+        }
+
+        // Ability activation logic
+        // Using Right Click Action to trigger the ability
+        // You can change the action to LEFT_CLICK_AIR or LEFT_CLICK_BLOCK if needed
+        // To make abilities you will have to know how to code in Java and work with Bukkit API
+        // If you don't know how to code, you can ask AI to help you with the code, ChatGPT is a good option
+
+        if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            UUID playerId = player.getUniqueId();
+            String ability = "ExamplePower";
+            int cooldownTime = 30;
+
+            if (CooldownUtils.isOnCooldown(playerId, ability)) {
+                double timeLeft = CooldownUtils.getRemainingCooldown(playerId, ability);
+                CooldownUtils.sendCooldownMessage(player, ability, timeLeft);
+                return;
+            }
+
+            player.sendMessage("§bYou activated Example Power!");
+            CooldownUtils.setCooldown(playerId, ability, cooldownTime);
+        }
+    }
+}
 ```
 
 ---
@@ -194,70 +312,109 @@ To create a new food item:
 package com.noctify.Custom.Foods;
 
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import java.util.List;
-import java.util.Collections;
 
-public class MagicApple {
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+public class ExampleFood {
+
+    // Creates the custom food item
+    // Check the OtherBehaviors package to see how to implement custom behaviors
+
     public static ItemStack createItem() {
-        ItemStack item = new ItemStack(Material.APPLE);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("§bMagic Apple");
-        item.setItemMeta(meta);
-        return item;
+        ItemStack foodItem = new ItemStack(Material.COOKED_BEEF); // Example material
+        ItemMeta meta = foodItem.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName("§6Sample Food");
+            meta.setLore(Arrays.asList(
+                    "§7This is a sample custom food.",
+                    "§7Use this as a template for creating your own."
+            ));
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            foodItem.setItemMeta(meta);
+        }
+        return foodItem;
     }
-    public static int getHungerPoints() { return 6; }
-    public static float getSaturationPoints() { return 9.6f; }
+
+    // Defines the hunger points restored by the food
+    public static int getHungerPoints() {
+        return 4; // Example value for hunger points
+    }
+
+    // Defines the saturation points restored by the food
+    public static float getSaturationPoints() {
+        return 2.5f; // Example value for saturation
+    }
+
+    // Defines any potion effects applied when the food is consumed
     public static List<PotionEffect> getEffects() {
-        return Collections.singletonList(new PotionEffect(PotionEffectType.REGENERATION, 200, 1));
+        return Collections.singletonList(
+                new PotionEffect(PotionEffectType.SPEED, 200, 1) // Example effect: Speed for 10 seconds
+        );
     }
-    // Add getRecipe(Plugin, NamespacedKey) as shown in samples
+
+    // If don't want any effects, return an empty list
+    //
+    // Example:
+    //
+    // public static List<PotionEffect> getEffects() {
+    //     return Collections.emptyList();
+    // }
+
+    // Defines the crafting recipe for the food
+    public static ShapedRecipe getRecipe(Plugin plugin, NamespacedKey key) {
+        ItemStack foodItem = createItem();
+        ShapedRecipe recipe = new ShapedRecipe(key, foodItem);
+        recipe.shape(" A ", " B ", " C ");
+        recipe.setIngredient('A', Material.APPLE);
+        recipe.setIngredient('B', Material.BREAD);
+        recipe.setIngredient('C', Material.COOKED_BEEF);
+        return recipe;
+    }
 }
 ```
 
 2. **Register the Food in FoodRegistry**:
    In `FoodRegistry.initialize()`:
 ```java
-registerFood(plugin, "MagicApple", MagicApple.class, null);
+registerFood(plugin, "ExampleFood", ExampleFood.class, ExampleFoodBehavior.class);
 ```
 You can also add a custom behavior by providing a behavior class in `OtherBehaviors`.
 
 ---
 
-### Custom Item Behaviors
+### Custom Food Behaviors
 
 Custom item behaviors are event listeners that give special abilities to your items.
+Put in package:
+package com.noctify.Custom.OtherBehaviors;
 
-**Example: Right-click ability with cooldown**
+**Example Food Behavior:**
 ```java
-package com.noctify.Custom.ItemBehavior;
+package com.noctify.Custom.OtherBehaviors;
 
-import com.noctify.Main.Utils.CooldownUtils;
-import com.noctify.Main.Utils.CustomItemUtils;
-import org.bukkit.Material;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.plugin.Plugin;
-import java.util.UUID;
 
-public class MySwordBehavior implements Listener {
-    public MySwordBehavior(Plugin plugin) {}
-    @EventHandler
-    public void onPlayerUse(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        if (!CustomItemUtils.isCustomItem(event.getItem(), Material.DIAMOND_SWORD, "&aMy Epic Sword")) return;
-        if (CooldownUtils.isOnCooldown(player.getUniqueId(), "MySwordAbility")) {
-            CooldownUtils.sendCooldownMessage(player, "MySwordAbility", CooldownUtils.getRemainingCooldown(player.getUniqueId(), "MySwordAbility"));
-            return;
-        }
-        // Ability logic here
-        player.sendMessage("§bSword power activated!");
-        CooldownUtils.setCooldown(player.getUniqueId(), "MySwordAbility", 30);
+import java.util.function.Consumer;
+
+public class ExampleFoodBehavior implements Listener, Consumer<Player> {
+
+    @Override
+    public void accept(Player player) {
+        // Example behavior: Create a small explosion at the player's location
+        Location location = player.getLocation();
+        player.getWorld().createExplosion(location, 2.0F, false, false); // Small explosion, no fire, no block damage
     }
 }
 ```

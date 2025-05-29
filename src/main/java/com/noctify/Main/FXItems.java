@@ -19,35 +19,29 @@ public final class FXItems extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
-        // Set the instance of the plugin
-        // Set the instance of the plugin
         instance = this;
-
-        // Save the default configuration file
-        instance = this;
-
-        // Save the default configuration file
         saveDefaultConfig();
-
-        // Initialize the registry
-        saveDefaultConfig();
-
-        // Initialize the registry
         ItemRegistry.initialize(this);
         CommandRegistry.initialize(this);
         EventRegistry.initialize(this);
         FoodRegistry.initialize(this);
 
-        // Create an instance of LegendaryItemCraftListener
-
         LegendaryItemCraftListener craftListener = new LegendaryItemCraftListener(this);
         Bukkit.getPluginManager().registerEvents(craftListener, this);
 
+        // Register command executors and tab completers
+        getCommand("fxgive").setExecutor(this);
+        getCommand("fxgive").setTabCompleter(this);
+        getCommand("fxreload").setExecutor(this);
+        getCommand("fxreload").setTabCompleter(this);
+        getCommand("fxutils").setExecutor(this);
+        getCommand("fxutils").setTabCompleter(this);
+        getCommand("nv").setExecutor(this);
+        getCommand("nightvision").setExecutor(this);
 
-        // Log a message to indicate the plugin has been enabled
         getLogger().info("Custom items and behaviors registered successfully!");
         getLogger().info(ChatColor.GREEN + "FXItems has been enabled!");
-}
+    }
 
     public static FXItems getInstance() {
         return instance;

@@ -1,9 +1,9 @@
 name: FXItems
-depend: [EntitySize]
-version: 'Beta | Build 1.0'
+depend: [ EntitySize ]
+version: 'b1.3'
 main: com.noctify.Main.FXItems
 api-version: '1.21'
-authors: [ zfxm ]
+authors: [ zfxm, noctify ]
 commands:
   fxreload:
     description: Reloads the plugin configuration.

@@ -15,6 +15,15 @@ import org.bukkit.util.Vector;
 public class ProjectileUtils implements Listener {
 
     private static Plugin plugin;
+    private static final boolean MODEL_ENGINE_ENABLED;
+
+    static {
+        boolean enabled = Bukkit.getPluginManager().getPlugin("ModelEngine") != null;
+        if (!enabled) {
+            Bukkit.getLogger().warning("[FXItems] ModelEngine plugin not found. Custom model projectiles are disabled.");
+        }
+        MODEL_ENGINE_ENABLED = enabled;
+    }
 
     public static void initialize(Plugin pluginInstance) {
         plugin = pluginInstance;
@@ -39,15 +48,23 @@ public class ProjectileUtils implements Listener {
             int despawnTime,
             int piercingLevel
     ) {
+        if (useModelEngine) {
+            if (!MODEL_ENGINE_ENABLED) {
+                Bukkit.getLogger().warning("[FXItems] Tried to spawn a ModelEngine projectile, but ModelEngine is not installed. Please install ModelEngine or set useModelEngine to false.");
+                return;
+            }
+            if (modelId == null || modelId.isEmpty()) {
+                Bukkit.getLogger().warning("[FXItems] ModelEngine projectile requested but modelId is null or empty.");
+                return;
+            }
+        }
+
         Location spawnLocation = shooter.getEyeLocation();
         Entity projectile;
 
-        if (useModelEngine) {
-            // Use ModelEngine to spawn the Custom model
-            // Replace this with the actual ModelEngine API call to spawn the model
+        if (useModelEngine && MODEL_ENGINE_ENABLED) {
             projectile = spawnModelEngineProjectile(plugin, shooter, modelId, spawnLocation);
         } else {
-            // Spawn the default entity type
             projectile = spawnLocation.getWorld().spawnEntity(spawnLocation, projectileType);
         }
 
@@ -77,7 +94,6 @@ public class ProjectileUtils implements Listener {
                     cancel();
                     return;
                 }
-
                 projectile.getWorld().spawnParticle(trailParticle, projectile.getLocation(), particleCount, 0, 0, 0, 0);
             }
         }.runTaskTimer(plugin, 0L, 1L);
@@ -91,14 +107,12 @@ public class ProjectileUtils implements Listener {
                         projectile.remove();
                     }
                 }
-            }.runTaskLater(plugin, despawnTime * 20L); // Convert seconds to ticks
+            }.runTaskLater(plugin, despawnTime * 20L);
         }
     }
 
     private static Entity spawnModelEngineProjectile(Plugin plugin, Player shooter, String modelId, Location location) {
         // Replace this with the actual ModelEngine API call to spawn the model
-        // Example: ModelEngine integration logic
-        // Ensure the returned object is compatible with the rest of the logic
         Entity modelEntity = location.getWorld().spawnEntity(location, EntityType.ARMOR_STAND); // Placeholder
         modelEntity.setCustomName(modelId);
         modelEntity.setCustomNameVisible(false);
@@ -111,10 +125,10 @@ public class ProjectileUtils implements Listener {
         if (event.getDamager() instanceof Arrow arrow && "custom_projectile".equals(arrow.getCustomName())) {
             if (arrow.getShooter() instanceof Player shooter) {
                 if (arrow.hasMetadata("custom_damage")) {
-                    event.setCancelled(true); // Cancel vanilla damage
+                    event.setCancelled(true);
                     double customDamage = arrow.getMetadata("custom_damage").get(0).asDouble();
                     if (event.getEntity() instanceof LivingEntity target) {
-                        target.damage(customDamage, shooter); // Apply Custom damage
+                        target.damage(customDamage, shooter);
                     }
                 }
             }

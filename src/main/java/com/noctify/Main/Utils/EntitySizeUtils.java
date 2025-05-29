@@ -8,20 +8,28 @@ import org.bukkit.entity.Player;
 
 public class EntitySizeUtils {
 
-    private static final EntitySize entitySizePlugin = (EntitySize) Bukkit.getPluginManager().getPlugin("EntitySize");
+    private static final EntitySize entitySizePlugin;
+    public static final boolean ENABLED;
 
-    /**
-     * Sets the size of an entity.
-     *
-     * @param entity The entity to resize.
-     * @param scale The scale factor (e.g., 0.5 for half size, 2.0 for double size).
-     */
-    public static void setSize(Entity entity, float scale) {
-        if (entitySizePlugin == null) {
-            Bukkit.getLogger().warning("EntitySize plugin is not available.");
-            return;
+    static {
+        EntitySize plugin = null;
+        boolean enabled = true;
+        try {
+            plugin = (EntitySize) Bukkit.getPluginManager().getPlugin("EntitySize");
+            if (plugin == null) {
+                enabled = false;
+                Bukkit.getLogger().warning("[FXItems] EntitySize plugin not found. EntitySizeUtils is disabled.");
+            }
+        } catch (Throwable t) {
+            enabled = false;
+            Bukkit.getLogger().warning("[FXItems] Error loading EntitySize plugin. EntitySizeUtils is disabled.");
         }
+        entitySizePlugin = plugin;
+        ENABLED = enabled;
+    }
 
+    public static void setSize(Entity entity, float scale) {
+        if (!ENABLED) return;
         if (entity instanceof Player player) {
             entitySizePlugin.setSize(player, scale);
         } else if (entity instanceof LivingEntity livingEntity) {
@@ -31,17 +39,8 @@ public class EntitySizeUtils {
         }
     }
 
-    /**
-     * Resets the size of an entity to its default.
-     *
-     * @param entity The entity to reset.
-     */
     public static void resetSize(Entity entity) {
-        if (entitySizePlugin == null) {
-            Bukkit.getLogger().warning("EntitySize plugin is not available.");
-            return;
-        }
-
+        if (!ENABLED) return;
         if (entity instanceof Player player) {
             entitySizePlugin.resetSize(player);
         } else if (entity instanceof LivingEntity livingEntity) {

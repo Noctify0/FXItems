@@ -1,6 +1,6 @@
 name: FXItems
 depend: [ EntitySize ]
-version: 'b1.2'
+version: 'b1.3'
 main: com.noctify.Main.FXItems
 api-version: '1.21'
 authors: [ zfxm, noctify ]

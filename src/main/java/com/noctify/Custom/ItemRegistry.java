@@ -24,10 +24,17 @@ public class ItemRegistry {
         // A sample ItemAttribute class will be provided in the package
         //
         // Sample ItemRegistry Implementation:
-        // registerItem("item_name", NameOfItemAttributesClass.class);
+        // registerItem("ItemName", NameOfItemAttributesClass.class);
+        //
+        //-------------------------------|
+        // WARNING - DO NOT MESS THIS UP |
+        // ------------------------------|
+        //
+        // Make sure the item name registered here has the same name as the class
+        // ExampleItem.java should be registered as "ExampleItem"
         //
 
-        registerItem("example_item", ExampleItem.class);
+        registerItem("ExampleItem", ExampleItem.class);
 
         // --------------------------------------------------------------------------
 
@@ -41,7 +48,7 @@ public class ItemRegistry {
         // registerBehavior(plugin, "item_name", NameOfItemBehaviorClass.class);
         //
 
-        registerBehavior(plugin, "example_item", ExampleItemBehavior.class);
+        registerBehavior(plugin, "ExampleItem", ExampleItemBehavior.class);
 
         // --------------------------------------------------------------------------
 

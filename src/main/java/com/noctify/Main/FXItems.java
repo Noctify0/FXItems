@@ -16,15 +16,22 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.md_5.bungee.api.ChatColor;
 
 import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 public final class FXItems extends JavaPlugin implements Listener {
 
     private static FXItems instance;
+    private File craftedItemsFile;
+    private FileConfiguration craftedItemsConfig;
 
     @Override
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
+
         ItemRegistry.initialize(this);
         CommandRegistry.initialize(this);
         EventRegistry.initialize(this);

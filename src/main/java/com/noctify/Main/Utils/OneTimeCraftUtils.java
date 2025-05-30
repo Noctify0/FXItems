@@ -2,8 +2,10 @@ package com.noctify.Main.Utils;
 
 import com.noctify.Custom.ItemRegistry;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
@@ -44,6 +46,27 @@ public class OneTimeCraftUtils {
 
     public static Map<String, OneTimeCraftItem> getRegisteredItems() {
         return registeredItems;
+    }
+
+    // Checks if the item is a one-time craft (has a *_crafted tag)
+    public boolean isOneTimeCraft(ItemStack item) {
+        if (item == null) return false;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return false;
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        for (NamespacedKey key : container.getKeys()) {
+            if (key.getKey().endsWith("_crafted") && container.get(key, PersistentDataType.BYTE) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Checks if the player has crafted the item (stub, adjust to your storage)
+    public boolean hasCrafted(Player player, ItemStack item) {
+        // TODO: Implement actual player crafting check logic
+        // For now, always return false (not crafted)
+        return false;
     }
 
     public static class OneTimeCraftItem {

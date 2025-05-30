@@ -26,15 +26,26 @@ public class LegendaryItemCraftListener implements Listener {
 
     @EventHandler
     public void onPrepareItemCraft(PrepareItemCraftEvent event) {
-        FileConfiguration config = plugin.getConfig();
         ItemStack result = event.getInventory().getResult();
-
         if (result == null) return;
 
         for (OneTimeCraftUtils.OneTimeCraftItem item : OneTimeCraftUtils.getRegisteredItems().values()) {
-            if (isLegendaryItem(result, item) && config.getBoolean(item.getName() + "_crafted")) {
-                event.getInventory().setResult(null);
-                return;
+            if (result.getType() == item.getMaterial()) {
+                // Block crafting if already crafted
+                if (plugin.getConfig().getBoolean(item.getName() + "_crafted")) {
+                    event.getInventory().setResult(null);
+                    return;
+                }
+                // Add the tag to the result
+                ItemMeta meta = result.getItemMeta();
+                if (meta != null) {
+                    meta.getPersistentDataContainer().set(
+                            new NamespacedKey(plugin, item.getName() + "_crafted"),
+                            PersistentDataType.BYTE, (byte) 1
+                    );
+                    result.setItemMeta(meta);
+                    event.getInventory().setResult(result);
+                }
             }
         }
     }

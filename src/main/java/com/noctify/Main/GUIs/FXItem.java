@@ -1,6 +1,7 @@
 package com.noctify.Main.GUIs;
 
 import com.noctify.Custom.ItemRegistry;
+import com.noctify.Main.Utils.CustomItemUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -95,20 +96,26 @@ public class FXItem implements Listener {
                 ItemStack clickedItem = event.getCurrentItem();
 
                 if (event.isLeftClick()) {
+                    boolean found = false;
                     try {
                         for (Class<?> itemClass : ItemRegistry.getRegisteredItemClasses()) {
                             Method createItemMethod = itemClass.getMethod("createItem");
                             ItemStack registeredItem = (ItemStack) createItemMethod.invoke(null);
 
-                            if (registeredItem.getItemMeta().getDisplayName().equals(clickedItem.getItemMeta().getDisplayName())) {
-                                Method recipeMethod = itemClass.getMethod("getRecipe", Plugin.class, org.bukkit.NamespacedKey.class);
-                                org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, itemClass.getSimpleName().toLowerCase() + "_recipe");
-                                recipeMethod.invoke(null, plugin, key);
-                                new CraftingGUI(plugin).openCraftingMenu(player, itemClass.getSimpleName());
-                                return;
+                            ItemMeta regMeta = registeredItem.getItemMeta();
+                            if (regMeta != null && regMeta.hasDisplayName()) {
+                                if (CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), regMeta.getDisplayName())) {
+                                    // Use the same key for both recipe and GUI
+                                    String keyName = itemClass.getSimpleName();
+                                    Method recipeMethod = itemClass.getMethod("getRecipe", Plugin.class, org.bukkit.NamespacedKey.class);
+                                    org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, keyName + "_recipe");
+                                    recipeMethod.invoke(null, plugin, key);
+                                    new CraftingGUI(plugin).openCraftingMenu(player, keyName);
+                                    found = true;
+                                    break;
+                                }
                             }
                         }
-                        player.sendMessage("§cError: Item not found in the registry.");
                     } catch (NoSuchMethodException e) {
                         player.sendMessage("§cError: Recipe method not found for the item.");
                         Bukkit.getLogger().severe("[FXItems] Method 'getRecipe' not found in class.");
@@ -117,6 +124,9 @@ public class FXItem implements Listener {
                         player.sendMessage("§cError: Failed to open recipe.");
                         Bukkit.getLogger().severe("[FXItems] Failed to invoke 'getRecipe' method.");
                         e.printStackTrace();
+                    }
+                    if (!found) {
+                        player.sendMessage("§cError: Item not found in the registry.");
                     }
                 }
             }

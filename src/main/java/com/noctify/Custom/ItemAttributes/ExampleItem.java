@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
 
@@ -72,5 +73,10 @@ public class ExampleItem {
         utils.registerCraft("example_item", exampleItem);
 
         return recipe;
+    }
+
+    public static ShapedRecipe getRecipe(JavaPlugin plugin, NamespacedKey key) {
+        // Just delegate to the Plugin version to avoid code duplication
+        return getRecipe((Plugin) plugin, key);
     }
 }

@@ -106,9 +106,19 @@ public class ItemRegistry {
         return FXItems.keySet();
     }
 
+    public static Set<Class<?>> getRegisteredItemClasses() {
+        return Set.copyOf(ItemClasses.values());
+    }
+
     public static ItemStack getCustomItem(String id) {
         return FXItems.get(id.toLowerCase());
     }
+
+    public static Class<?> getItemClass(String itemName) {
+        return ItemClasses.get(itemName.toLowerCase());
+    }
+
+    private static final Map<String, Class<?>> ItemClasses = new HashMap<>();
 
     // Add this method to the ItemRegistry class
     public static void addRecipe(Plugin plugin, Class<?> attributesClass) {
@@ -128,12 +138,12 @@ public class ItemRegistry {
                     Object recipe = method.invoke(null, plugin, key);
                     Bukkit.addRecipe((org.bukkit.inventory.Recipe) recipe);
 
-                    Bukkit.broadcastMessage("§aSuccessfully loaded recipe: " + key.getKey());
+                    Bukkit.getLogger().info("[FXItems] Successfully loaded recipe: " + key.getKey());
                     recipeIndex++;
                 }
             }
         } catch (Exception e) {
-            Bukkit.broadcastMessage("§cFailed to add recipe for attributes class: " + attributesClass.getName());
+            Bukkit.getLogger().severe("[FXItems] Failed to add recipe for item.");
             e.printStackTrace();
         }
     }
@@ -152,12 +162,12 @@ public class ItemRegistry {
 
     public static void registerItem(String itemName, Class<?> itemClass) {
         try {
-            // Use reflection to invoke the createItem method
             ItemStack item = (ItemStack) itemClass.getMethod("createItem").invoke(null);
             FXItems.put(itemName.toLowerCase(), item);
-            Bukkit.broadcastMessage("§aSuccessfully registered item: " + itemName);
+            ItemClasses.put(itemName.toLowerCase(), itemClass);
+            Bukkit.getLogger().info("[FXItems] Successfully registered item: " + itemName);
         } catch (Exception e) {
-            Bukkit.broadcastMessage("§cFailed to register item: " + itemName);
+            Bukkit.getLogger().severe("[FXItems] Failed to register item: " + itemName);
             e.printStackTrace();
         }
     }

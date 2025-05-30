@@ -37,8 +37,9 @@ public class ExampleItem {
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
 
             // Set a custom item model for the item
-            NamespacedKey modelKey = NamespacedKey.minecraft("example_sword");
-            meta.setItemModel(modelKey);
+            //
+            // NamespacedKey modelKey = NamespacedKey.minecraft("example_sword");
+            // meta.setItemModel(modelKey);
             // Apply the custom attributes to the item
             item.setItemMeta(meta);
         }

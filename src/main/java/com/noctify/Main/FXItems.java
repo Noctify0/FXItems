@@ -50,6 +50,7 @@ public final class FXItems extends JavaPlugin implements Listener {
         getCommand("fxutils").setTabCompleter(this);
         getCommand("nv").setExecutor(this);
         getCommand("nightvision").setExecutor(this);
+        getCommand("fxitems").setExecutor(this);
 
         getLogger().info("Custom items and behaviors registered successfully!");
         getLogger().info(ChatColor.GREEN + "FXItems has been enabled!");
@@ -73,6 +74,10 @@ public final class FXItems extends JavaPlugin implements Listener {
 
         String commandName = command.getName().toLowerCase();
         switch (commandName) {
+            case "fxitems" -> {
+                new com.noctify.Main.GUIs.FXItem(this).openMainMenu(player);
+                return true;
+            }
             case "fxreload" -> {
                 if (!player.isOp()) {
                     player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
@@ -179,7 +184,7 @@ public final class FXItems extends JavaPlugin implements Listener {
                     // Disable night vision
                     player.removeMetadata("night_vision", FXItems.getInstance());
                     player.removePotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION); // Remove night vision effect
-                    player.sendMessage(ChatColor.YELLOW + "Night vision disabled.");
+                    player.sendMessage(ChatColor.RED + "Night vision disabled.");
                 } else {
                     // Enable night vision
                     player.setMetadata("night_vision", new org.bukkit.metadata.FixedMetadataValue(FXItems.getInstance(), true));

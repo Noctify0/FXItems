@@ -2,7 +2,7 @@ name: FXItems
 softdepend:
   - EntitySize
   - ModelEngine
-version: 'Pre-v1.0'
+version: 'v1.0'
 main: com.noctify.Main.FXItems
 api-version: '1.21'
 authors: [ zfxm, noctify ]
@@ -28,6 +28,9 @@ commands:
   ping:
     description: A simple ping command.
     usage: /ping
+  fxitems:
+    description: Opens the FXItems menu.
+    usage: /fxitems
 permissions:
   fxitems.nightvision:
     description: Allows the player to toggle night vision.

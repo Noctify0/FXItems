@@ -1,5 +1,6 @@
 package com.noctify.Main.Utils;
 
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -20,9 +21,13 @@ public class ProjectileUtils implements Listener {
     static {
         boolean enabled = Bukkit.getPluginManager().getPlugin("ModelEngine") != null;
         if (!enabled) {
-            Bukkit.getLogger().warning("[FXItems] ModelEngine plugin not found. Custom model projectiles are disabled.");
+
         }
         MODEL_ENGINE_ENABLED = enabled;
+    }
+
+    public static boolean isModelEngineEnabled() {
+        return MODEL_ENGINE_ENABLED;
     }
 
     public static void initialize(Plugin pluginInstance) {

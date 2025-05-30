@@ -1,6 +1,8 @@
 name: FXItems
-depend: [ EntitySize ]
-version: 'b1.3'
+softdepend:
+  - EntitySize
+  - ModelEngine
+version: 'Pre-v1.0'
 main: com.noctify.Main.FXItems
 api-version: '1.21'
 authors: [ zfxm, noctify ]

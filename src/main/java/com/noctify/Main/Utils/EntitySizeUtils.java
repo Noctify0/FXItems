@@ -1,6 +1,7 @@
 package com.noctify.Main.Utils;
 
 import com.maximde.entitysize.EntitySize;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -18,11 +19,9 @@ public class EntitySizeUtils {
             plugin = (EntitySize) Bukkit.getPluginManager().getPlugin("EntitySize");
             if (plugin == null) {
                 enabled = false;
-                Bukkit.getLogger().warning("[FXItems] EntitySize plugin not found. EntitySizeUtils is disabled.");
             }
         } catch (Throwable t) {
             enabled = false;
-            Bukkit.getLogger().warning("[FXItems] Error loading EntitySize plugin. EntitySizeUtils is disabled.");
         }
         entitySizePlugin = plugin;
         ENABLED = enabled;

@@ -1,7 +1,10 @@
 package com.noctify.Main;
 
+import com.maximde.entitysize.EntitySize;
 import com.noctify.Custom.*;
 import com.noctify.Main.Listeners.*;
+import com.noctify.Main.Utils.EntitySizeUtils;
+import com.noctify.Main.Utils.ProjectileUtils;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -10,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import net.md_5.bungee.api.ChatColor;
 
 import java.util.*;
 
@@ -25,6 +29,14 @@ public final class FXItems extends JavaPlugin implements Listener {
         CommandRegistry.initialize(this);
         EventRegistry.initialize(this);
         FoodRegistry.initialize(this);
+
+        if (!EntitySizeUtils.ENABLED) {
+            getLogger().warning("EntitySizeUtils is disabled because the EntitySize plugin is missing.");
+        }
+
+        if (!ProjectileUtils.isModelEngineEnabled()) {
+            getLogger().warning("ModelEngine is missing. Custom model projectiles in ProjectileUtils are disabled.");
+        }
 
         LegendaryItemCraftListener craftListener = new LegendaryItemCraftListener(this);
         Bukkit.getPluginManager().registerEvents(craftListener, this);

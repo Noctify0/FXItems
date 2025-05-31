@@ -59,17 +59,57 @@ Content is organized in a modular package structure:
 
 ```
 src/main/java/com/noctify/
+  FXItems.java
+
+  API/
+    Registry.java
+    RegistryAPI.java
+    Utils.java
+    UtilsAPI.java
+
   Custom/
     Commands/
     Events/
-    Foods/
-    ItemAttributes/
     ItemBehavior/
     OtherBehaviors/
+    CommandRegistry.java
+    EventRegistry.java
+    FoodRegistry.java
+    ItemRegistry.java
+
   Main/
     Commands/
+      CUtils.java
+    Exceptions/
+      AutoRegisterException.java
+      ProjectileException.java
+      RecipeException.java
+    GUIs/
+      CraftingGUI.java
+      FXItem.java
     Listeners/
+      FXFoodListener.java
+      FXItemListener.java
+      LegnedaryItemCraftListener.java
+    Registration/
+      AutoRegister.java
+      BehaviorAutoRegistrar.java
+      FXFoodBehavior.java
+      FXFoodDefinition.java
+      FXItemBehavior.java
+      FXItemDefinition.java
+      FXItemRecipe.java
+      Rarity.java
     Utils/
+      CooldownUtils.java
+      CustomItemUtils.java
+      EffectUtils.java
+      EntitySizeUtils.java
+      GammaUtils.java
+      ManaUtils.java
+      OneTimeCraftUtils.java
+      ProjectileUtils.java
+      TeleportUtils.java
 ```
 
 See [A | Getting Started & Plugin Overview](https://github.com/Noctify0/FXItems/wiki/A-%7C-Getting-Started-&-Plugin-Overview) for a beginner’s walkthrough.

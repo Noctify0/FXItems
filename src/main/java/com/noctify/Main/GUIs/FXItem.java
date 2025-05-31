@@ -1,7 +1,9 @@
 package com.noctify.Main.GUIs;
 
+import com.noctify.Custom.FoodRegistry;
 import com.noctify.Custom.ItemRegistry;
 import com.noctify.Main.Utils.CustomItemUtils;
+import com.noctify.Main.Exceptions.RecipeException;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -38,24 +40,27 @@ public class FXItem implements Listener {
             }
         }
 
-        // Add registered items to the menu
         int index = 10; // Start from the second row
-        for (Class<?> itemClass : ItemRegistry.getRegisteredItemClasses()) {
-            try {
-                // Get the item from the attributes class
-                Method createItemMethod = itemClass.getMethod("createItem");
-                ItemStack item = (ItemStack) createItemMethod.invoke(null);
 
-                // Add lore to the item
+        // Add registered items
+        for (String itemId : ItemRegistry.getItemIds()) {
+            ItemStack item = ItemRegistry.getCustomItem(itemId);
+            if (item != null) {
                 addLoreToItem(item, player);
-
-                // Add the item to the menu
                 menu.setItem(index, item);
                 index++;
                 if (index % 9 == 8) index += 2; // Skip edges
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("[FXItems] Failed to load item from class: " + itemClass.getName());
-                e.printStackTrace();
+            }
+        }
+
+        // Add registered foods
+        for (String foodId : FoodRegistry.getFoodIds()) {
+            ItemStack food = FoodRegistry.getFoodItem(foodId);
+            if (food != null) {
+                addLoreToItem(food, player); // Reuse the same lore helper
+                menu.setItem(index, food);
+                index++;
+                if (index % 9 == 8) index += 2; // Skip edges
             }
         }
 
@@ -91,39 +96,42 @@ public class FXItem implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (event.getView().getTitle().equals("§8§lFXItems")) {
             event.setCancelled(true);
-            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.GRAY_STAINED_GLASS_PANE) {
+            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.BLACK_STAINED_GLASS_PANE) {
                 Player player = (Player) event.getWhoClicked();
                 ItemStack clickedItem = event.getCurrentItem();
 
                 if (event.isLeftClick()) {
                     boolean found = false;
-                    try {
-                        for (Class<?> itemClass : ItemRegistry.getRegisteredItemClasses()) {
-                            Method createItemMethod = itemClass.getMethod("createItem");
-                            ItemStack registeredItem = (ItemStack) createItemMethod.invoke(null);
-
-                            ItemMeta regMeta = registeredItem.getItemMeta();
-                            if (regMeta != null && regMeta.hasDisplayName()) {
-                                if (CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), regMeta.getDisplayName())) {
-                                    // Use the same key for both recipe and GUI
-                                    String keyName = itemClass.getSimpleName();
-                                    Method recipeMethod = itemClass.getMethod("getRecipe", Plugin.class, org.bukkit.NamespacedKey.class);
-                                    org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, keyName + "_recipe");
-                                    recipeMethod.invoke(null, plugin, key);
-                                    new CraftingGUI(plugin).openCraftingMenu(player, keyName);
-                                    found = true;
-                                    break;
+                    // Check custom items
+                    for (String itemId : ItemRegistry.getItemIds()) {
+                        ItemStack registeredItem = ItemRegistry.getCustomItem(itemId);
+                        if (registeredItem != null && CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), registeredItem.getItemMeta().getDisplayName())) {
+                            String keyName = itemId;
+                            try {
+                                new CraftingGUI(plugin).openCraftingMenu(player, keyName);
+                            } catch (RecipeException e) {
+                                // Exception already sends the message to the player
+                            }
+                            found = true;
+                            break;
+                        }
+                    }
+                    // Check custom foods if not found in items
+                    if (!found) {
+                        for (String foodId : FoodRegistry.getFoodIds()) {
+                            ItemStack registeredFood = FoodRegistry.getFoodItem(foodId);
+                            if (registeredFood != null && CustomItemUtils.isCustomItem(clickedItem, registeredFood.getType(), registeredFood.getItemMeta().getDisplayName())) {
+                                String keyName = foodId;
+                                try {
+                                    // You may need to implement openFoodCraftingMenu in CraftingGUI
+                                    new CraftingGUI(plugin).openFoodCraftingMenu(player, keyName);
+                                } catch (RecipeException e) {
+                                    // Exception already sends the message to the player
                                 }
+                                found = true;
+                                break;
                             }
                         }
-                    } catch (NoSuchMethodException e) {
-                        player.sendMessage("§cError: Recipe method not found for the item.");
-                        Bukkit.getLogger().severe("[FXItems] Method 'getRecipe' not found in class.");
-                        e.printStackTrace();
-                    } catch (Exception e) {
-                        player.sendMessage("§cError: Failed to open recipe.");
-                        Bukkit.getLogger().severe("[FXItems] Failed to invoke 'getRecipe' method.");
-                        e.printStackTrace();
                     }
                     if (!found) {
                         player.sendMessage("§cError: Item not found in the registry.");

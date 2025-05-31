@@ -4,24 +4,24 @@ import com.noctify.Custom.ItemRegistry;
 import com.noctify.Custom.CommandRegistry;
 import com.noctify.Custom.EventRegistry;
 import com.noctify.Custom.FoodRegistry;
+import com.noctify.Main.Registration.FXFoodBehavior;
+import com.noctify.Main.Registration.FXFoodDefinition;
+import com.noctify.Main.Registration.FXItemDefinition;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 public class Registry {
-    // Item registration
-    public static void registerItem(String itemName, Class<?> itemClass) {
-        ItemRegistry.registerItem(itemName, itemClass);
+
+    // Register a custom item with its definition
+    public static void registerItem(String itemName, FXItemDefinition itemDefinition) {
+        ItemRegistry.registerItem(itemName, itemDefinition);
     }
 
-    // Behavior registration
-    public static void registerBehavior(Plugin plugin, String itemName, Class<?> behaviorClass) {
-        ItemRegistry.registerBehavior(plugin, itemName, behaviorClass);
-    }
-
-    // Recipe registration
-    public static void addRecipe(Plugin plugin, Class<?> attributesClass) {
-        ItemRegistry.addRecipe(plugin, attributesClass);
+    // Optionally, get a custom item by ID
+    public static org.bukkit.inventory.ItemStack getCustomItem(String itemName) {
+        return ItemRegistry.getCustomItem(itemName);
     }
 
     // Command registration (by name and class)
@@ -45,7 +45,7 @@ public class Registry {
     }
 
     // Food registration
-    public static void registerFood(Plugin plugin, String foodName, Class<?> foodClass, Class<?> behaviorClass) {
-        FoodRegistry.registerFood(plugin, foodName, foodClass, behaviorClass);
+    public static void registerFood(String foodName, FXFoodDefinition definition, FXFoodBehavior behavior) {
+        FoodRegistry.registerFood(foodName, definition, behavior);
     }
 }

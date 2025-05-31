@@ -1,5 +1,6 @@
 package com.noctify.Main.Utils;
 
+import com.noctify.Main.Exceptions.ProjectileException;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -20,9 +21,6 @@ public class ProjectileUtils implements Listener {
 
     static {
         boolean enabled = Bukkit.getPluginManager().getPlugin("ModelEngine") != null;
-        if (!enabled) {
-
-        }
         MODEL_ENGINE_ENABLED = enabled;
     }
 
@@ -52,15 +50,13 @@ public class ProjectileUtils implements Listener {
             String modelId,
             int despawnTime,
             int piercingLevel
-    ) {
+    ) throws ProjectileException {
         if (useModelEngine) {
             if (!MODEL_ENGINE_ENABLED) {
-                Bukkit.getLogger().warning("[FXItems] Tried to spawn a ModelEngine projectile, but ModelEngine is not installed. Please install ModelEngine or set useModelEngine to false.");
-                return;
+                throw new ProjectileException("§c[FXItems] Tried to spawn a ModelEngine projectile, but ModelEngine is not installed. Please install ModelEngine or set useModelEngine to false.", shooter);
             }
             if (modelId == null || modelId.isEmpty()) {
-                Bukkit.getLogger().warning("[FXItems] ModelEngine projectile requested but modelId is null or empty.");
-                return;
+                throw new ProjectileException("§c[FXItems] ModelEngine projectile requested but modelId is null or empty.", shooter);
             }
         }
 

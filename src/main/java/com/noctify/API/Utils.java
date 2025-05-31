@@ -1,5 +1,6 @@
 package com.noctify.API;
 
+import com.noctify.Main.Exceptions.ProjectileException;
 import com.noctify.Main.Utils.CooldownUtils;
 import com.noctify.Main.Utils.CustomItemUtils;
 import com.noctify.Main.Utils.EffectUtils;
@@ -114,10 +115,14 @@ public class Utils {
             int despawnTime,
             int piercingLevel
     ) {
-        ProjectileUtils.createCustomProjectile(
-                plugin, shooter, trailParticle, particleCount, gravity, glowing, knockbackStrength, silent,
-                speed, damage, speedBasedDamage, projectileType, useModelEngine, modelId, despawnTime, piercingLevel
-        );
+        try {
+            ProjectileUtils.createCustomProjectile(
+                    plugin, shooter, trailParticle, particleCount, gravity, glowing, knockbackStrength, silent,
+                    speed, damage, speedBasedDamage, projectileType, useModelEngine, modelId, despawnTime, piercingLevel
+            );
+        } catch (ProjectileException e) {
+            // Exception already sends/logs the message
+        }
     }
 
     // --- TeleportUtils ---

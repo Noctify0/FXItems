@@ -32,6 +32,16 @@ public final class FXItems extends JavaPlugin implements Listener {
         instance = this;
         saveDefaultConfig();
 
+        File rarityLangFile = new File(getDataFolder(), "RarityLang.yml");
+        if (!rarityLangFile.exists()) {
+            saveResource("RarityLang.yml", false);
+        }
+        FileConfiguration rarityLangConfig = YamlConfiguration.loadConfiguration(rarityLangFile);
+
+        ItemRegistry.loadRarityLang(this);
+        ItemRegistry.initOneTimeCraftUtils(this);
+        Bukkit.getPluginManager().registerEvents(new ItemRegistry(), this);
+
         ItemRegistry.initialize(this);
         CommandRegistry.initialize(this);
         EventRegistry.initialize(this);
@@ -47,6 +57,8 @@ public final class FXItems extends JavaPlugin implements Listener {
 
         LegendaryItemCraftListener craftListener = new LegendaryItemCraftListener(this);
         Bukkit.getPluginManager().registerEvents(craftListener, this);
+        Bukkit.getPluginManager().registerEvents(new FXItemListener(), this);
+        Bukkit.getPluginManager().registerEvents(new FXFoodListener(this), this);
 
         // Register command executors and tab completers
         getCommand("fxgive").setExecutor(this);
@@ -145,19 +157,24 @@ public final class FXItems extends JavaPlugin implements Listener {
                     return true;
                 }
 
-                ItemStack item = ItemRegistry.getCustomItem(itemId);
-                if (item == null) {
-                    player.sendMessage(ChatColor.RED + "Item with ID '" + itemId + "' not found!");
+                ItemStack baseItem = ItemRegistry.getCustomItem(itemId);
+                if (baseItem == null) {
+                    baseItem = FoodRegistry.getFoodItem(itemId); // Try food registry if not found in item registry
+                }
+                if (baseItem == null) {
+                    player.sendMessage(ChatColor.RED + "Item or food with ID '" + itemId + "' not found!");
                     return true;
                 }
-                item.setAmount(count);
 
                 for (Player target : targets) {
+                    ItemStack item = baseItem.clone();
+                    item.setAmount(count);
                     target.getInventory().addItem(item);
                     target.sendMessage(ChatColor.GOLD + "You have received " + count + "x " + itemId + "!");
                 }
 
                 player.sendMessage(ChatColor.GREEN + "Gave " + count + "x " + itemId + " to " + targets.size() + " player(s).");
+                return true;
             }
             case "fxutils" -> {
                 if (!player.isOp()) {
@@ -262,8 +279,11 @@ public final class FXItems extends JavaPlugin implements Listener {
                     Bukkit.getOnlinePlayers().forEach(player -> suggestions.add(player.getName()));
                     return suggestions;
                 } else if (args.length == 2) {
-                    // Suggest Custom item IDs
-                    return new ArrayList<>(ItemRegistry.getItemIds());
+                    // Suggest both custom item IDs and custom food IDs
+                    Set<String> suggestions = new HashSet<>();
+                    suggestions.addAll(ItemRegistry.getItemIds());
+                    suggestions.addAll(FoodRegistry.getFoodIds());
+                    return new ArrayList<>(suggestions);
                 } else if (args.length == 3) {
                     // Suggest common counts
                     return List.of("1", "10", "64");
@@ -271,18 +291,15 @@ public final class FXItems extends JavaPlugin implements Listener {
             }
             case "fxreload" -> {
                 if (args.length == 1) {
-                    // Suggest arguments for /fxreload
                     return List.of("config", "cooldowns");
                 }
             }
             case "fxutils" -> {
                 if (args.length == 1) {
-                    // Suggest subcommands for /fxutils
                     return List.of("cleararmor");
                 }
             }
         }
-
-        return null; // No suggestions for other commands
+        return null;
     }
 }

@@ -86,8 +86,8 @@ public class FXItem implements Listener {
             if (!lore.contains("§eLeft Click to view Recipe")) {
                 lore.add("§eLeft Click to view Recipe");
             }
-            if (player.hasPermission("fxitems.itemguiperm") && !lore.contains("§eShift + Right Click to get item")) {
-                lore.add("§eShift + Right Click to get item");
+            if (player.hasPermission("fxitems.itemguiperm") && !lore.contains("§eRight Click to get item")) {
+                lore.add("§eRight Click to get item");
             }
             meta.setLore(lore);
             item.setItemMeta(meta);
@@ -99,45 +99,27 @@ public class FXItem implements Listener {
         String guiTitle = FXItems.getFxItemsGuiTitle();
         if (event.getView().getTitle().equals(guiTitle)) {
             event.setCancelled(true);
+            if (event.getClickedInventory() == null || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
+                return;
+            }
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.BLACK_STAINED_GLASS_PANE) {
                 Player player = (Player) event.getWhoClicked();
                 ItemStack clickedItem = event.getCurrentItem();
 
-                // Shift + Right Click to get item (admin only)
-                if (event.isShiftClick() && event.isRightClick() && player.hasPermission("fxitems.itemguiperm")) {
-                    // Check custom items
-                    for (String itemId : ItemRegistry.getItemIds()) {
-                        ItemStack registeredItem = ItemRegistry.getCustomItem(itemId);
-                        if (registeredItem != null && CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), registeredItem.getItemMeta().getDisplayName())) {
-                            player.getInventory().addItem(registeredItem.clone());
-                            player.sendMessage("§aYou have received the item: " + registeredItem.getItemMeta().getDisplayName());
-                            return;
-                        }
-                    }
-                    // Check custom foods
-                    for (String foodId : FoodRegistry.getFoodIds()) {
-                        ItemStack registeredFood = FoodRegistry.getFoodItem(foodId);
-                        if (registeredFood != null && CustomItemUtils.isCustomItem(clickedItem, registeredFood.getType(), registeredFood.getItemMeta().getDisplayName())) {
-                            player.getInventory().addItem(registeredFood.clone());
-                            player.sendMessage("§aYou have received the food: " + registeredFood.getItemMeta().getDisplayName());
-                            return;
-                        }
-                    }
-                    player.sendMessage("§cError: Item not found in the registry.");
-                    return;
-                }
-
-                // Left Click to view recipe
-                if (event.isLeftClick()) {
+                // Right Click: Give item if admin, else show recipe
+                if (event.isRightClick()) {
                     boolean found = false;
                     for (String itemId : ItemRegistry.getItemIds()) {
                         ItemStack registeredItem = ItemRegistry.getCustomItem(itemId);
                         if (registeredItem != null && CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), registeredItem.getItemMeta().getDisplayName())) {
-                            String keyName = itemId;
-                            try {
-                                new CraftingGUI(plugin).openCraftingMenu(player, keyName);
-                            } catch (RecipeException e) {
-                                // Exception already sends the message to the player
+                            if (player.hasPermission("fxitems.itemguiperm")) {
+                                player.getInventory().addItem(registeredItem.clone());
+                                player.sendMessage("§aYou have received the item: " + registeredItem.getItemMeta().getDisplayName());
+                                player.closeInventory();
+                            } else {
+                                try {
+                                    new CraftingGUI(plugin).openCraftingMenu(player, itemId);
+                                } catch (RecipeException e) {}
                             }
                             found = true;
                             break;
@@ -147,12 +129,46 @@ public class FXItem implements Listener {
                         for (String foodId : FoodRegistry.getFoodIds()) {
                             ItemStack registeredFood = FoodRegistry.getFoodItem(foodId);
                             if (registeredFood != null && CustomItemUtils.isCustomItem(clickedItem, registeredFood.getType(), registeredFood.getItemMeta().getDisplayName())) {
-                                String keyName = foodId;
-                                try {
-                                    new CraftingGUI(plugin).openFoodCraftingMenu(player, keyName);
-                                } catch (RecipeException e) {
-                                    // Exception already sends the message to the player
+                                if (player.hasPermission("fxitems.itemguiperm")) {
+                                    player.getInventory().addItem(registeredFood.clone());
+                                    player.sendMessage("§aYou have received the food: " + registeredFood.getItemMeta().getDisplayName());
+                                    player.closeInventory();
+                                } else {
+                                    try {
+                                        new CraftingGUI(plugin).openFoodCraftingMenu(player, foodId);
+                                    } catch (RecipeException e) {}
                                 }
+                                found = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!found) {
+                        player.sendMessage("§cError: Item not found in the registry.");
+                    }
+                    return;
+                }
+
+                // Left Click: Always show recipe
+                if (event.isLeftClick()) {
+                    boolean found = false;
+                    for (String itemId : ItemRegistry.getItemIds()) {
+                        ItemStack registeredItem = ItemRegistry.getCustomItem(itemId);
+                        if (registeredItem != null && CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), registeredItem.getItemMeta().getDisplayName())) {
+                            try {
+                                new CraftingGUI(plugin).openCraftingMenu(player, itemId);
+                            } catch (RecipeException e) {}
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        for (String foodId : FoodRegistry.getFoodIds()) {
+                            ItemStack registeredFood = FoodRegistry.getFoodItem(foodId);
+                            if (registeredFood != null && CustomItemUtils.isCustomItem(clickedItem, registeredFood.getType(), registeredFood.getItemMeta().getDisplayName())) {
+                                try {
+                                    new CraftingGUI(plugin).openFoodCraftingMenu(player, foodId);
+                                } catch (RecipeException e) {}
                                 found = true;
                                 break;
                             }

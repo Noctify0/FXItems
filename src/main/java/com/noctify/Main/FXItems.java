@@ -24,8 +24,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public final class FXItems extends JavaPlugin implements Listener {
 
     private static FXItems instance;
-    private File craftedItemsFile;
-    private FileConfiguration craftedItemsConfig;
+    private static String fxItemsGuiTitle;
+    private FileConfiguration langConfig;
 
     @Override
     public void onEnable() {
@@ -38,9 +38,18 @@ public final class FXItems extends JavaPlugin implements Listener {
         }
         FileConfiguration rarityLangConfig = YamlConfiguration.loadConfiguration(rarityLangFile);
 
+        File langFile = new File(getDataFolder(), "Lang.yml");
+        if (!langFile.exists()) {
+            saveResource("Lang.yml", false);
+        }
+        langConfig = YamlConfiguration.loadConfiguration(langFile);
+
+        fxItemsGuiTitle = langConfig.getString("CraftingGUI.fxitems_gui_title", "§8§lFXItems");
+
         ItemRegistry.loadRarityLang(this);
         ItemRegistry.initOneTimeCraftUtils(this);
         Bukkit.getPluginManager().registerEvents(new ItemRegistry(), this);
+        Bukkit.getPluginManager().registerEvents(new com.noctify.Main.GUIs.FXItem(this), this);
 
         ItemRegistry.initialize(this);
         CommandRegistry.initialize(this);
@@ -70,13 +79,22 @@ public final class FXItems extends JavaPlugin implements Listener {
         getCommand("nv").setExecutor(this);
         getCommand("nightvision").setExecutor(this);
         getCommand("fxitems").setExecutor(this);
+        getCommand("fxhelp").setExecutor(this);
+        getCommand("fxhelp").setTabCompleter(this);
 
         getLogger().info("Custom items and behaviors registered successfully!");
         getLogger().info(ChatColor.GREEN + "FXItems has been enabled!");
     }
 
+    public static String getFxItemsGuiTitle() { return fxItemsGuiTitle; }
+
     public static FXItems getInstance() {
         return instance;
+    }
+
+    private String getHelpMessage() {
+        String msg = langConfig.getString("Commands.help_message", "&cHelp message not set.");
+        return ChatColor.translateAlternateColorCodes('&', msg);
     }
 
     @Override
@@ -84,10 +102,15 @@ public final class FXItems extends JavaPlugin implements Listener {
         getLogger().info("FXItems disabled!");
     }
 
+    private String getLangMessage(String path) {
+        String msg = langConfig.getString("Commands." + path, "&cMessage not set: " + path);
+        return ChatColor.translateAlternateColorCodes('&', msg);
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(ChatColor.RED + "Only players can use this command!");
+            sender.sendMessage(getLangMessage("only_players"));
             return true;
         }
 
@@ -99,38 +122,54 @@ public final class FXItems extends JavaPlugin implements Listener {
             }
             case "fxreload" -> {
                 if (!player.isOp()) {
-                    player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                    player.sendMessage(getLangMessage("no_permission"));
                     return true;
                 }
 
                 if (args.length == 0) {
                     reloadConfig();
+
+                    // Reload Lang.yml
+                    File langFile = new File(getDataFolder(), "Lang.yml");
+                    if (!langFile.exists()) {
+                        saveResource("Lang.yml", false);
+                    }
+                    langConfig = YamlConfiguration.loadConfiguration(langFile);
+                    fxItemsGuiTitle = langConfig.getString("CraftingGUI.fxitems_gui_title", "§8§lFXItems");
+
+                    // Reload RarityLang.yml
+                    File rarityLangFile = new File(getDataFolder(), "RarityLang.yml");
+                    if (!rarityLangFile.exists()) {
+                        saveResource("RarityLang.yml", false);
+                    }
+                    ItemRegistry.loadRarityLang(this);
+
                     com.noctify.Main.Utils.CooldownUtils.clearAllCooldowns();
-                    player.sendMessage(ChatColor.GREEN + "FXItems reloaded! Config and Items have been reloaded.");
+                    player.sendMessage(getLangMessage("config_reloaded"));
                 } else if (args.length == 1) {
                     switch (args[0].toLowerCase()) {
                         case "config" -> {
                             reloadConfig();
-                            player.sendMessage(ChatColor.GREEN + "Config reloaded!");
+                            player.sendMessage(getLangMessage("config_reloaded"));
                         }
                         case "cooldowns" -> {
                             com.noctify.Main.Utils.CooldownUtils.clearAllCooldowns();
-                            player.sendMessage(ChatColor.GREEN + "All cooldowns have been reset!");
+                            player.sendMessage(getLangMessage("cooldowns_reset"));
                         }
-                        default -> player.sendMessage(ChatColor.RED + "Invalid argument. Use /fxreload [config|cooldowns].");
+                        default -> player.sendMessage(getLangMessage("invalid_argument"));
                     }
                 } else {
-                    player.sendMessage(ChatColor.RED + "Usage: /fxreload [config|cooldowns]");
+                    player.sendMessage(getLangMessage("usage_fxreload"));
                 }
             }
             case "fxgive" -> {
                 if (!player.isOp()) {
-                    player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                    player.sendMessage(getLangMessage("no_permission"));
                     return true;
                 }
 
                 if (args.length < 2) {
-                    player.sendMessage(ChatColor.RED + "Usage: /fxgive {player} {item} [count]");
+                    player.sendMessage(getLangMessage("usage_fxgive"));
                     return true;
                 }
 
@@ -142,11 +181,11 @@ public final class FXItems extends JavaPlugin implements Listener {
                     try {
                         count = Integer.parseInt(args[2]);
                         if (count <= 0) {
-                            player.sendMessage(ChatColor.RED + "Count must be a positive number.");
+                            player.sendMessage(getLangMessage("count_positive"));
                             return true;
                         }
                     } catch (NumberFormatException e) {
-                        player.sendMessage(ChatColor.RED + "Invalid count. Please provide a valid number.");
+                        player.sendMessage(getLangMessage("invalid_count"));
                         return true;
                     }
                 }
@@ -159,7 +198,7 @@ public final class FXItems extends JavaPlugin implements Listener {
 
                 ItemStack baseItem = ItemRegistry.getCustomItem(itemId);
                 if (baseItem == null) {
-                    baseItem = FoodRegistry.getFoodItem(itemId); // Try food registry if not found in item registry
+                    baseItem = FoodRegistry.getFoodItem(itemId);
                 }
                 if (baseItem == null) {
                     player.sendMessage(ChatColor.RED + "Item or food with ID '" + itemId + "' not found!");
@@ -178,12 +217,12 @@ public final class FXItems extends JavaPlugin implements Listener {
             }
             case "fxutils" -> {
                 if (!player.isOp()) {
-                    player.sendMessage(ChatColor.RED + "You do not have permission to use this command!");
+                    player.sendMessage(getLangMessage("no_permission"));
                     return true;
                 }
 
                 if (args.length == 0) {
-                    player.sendMessage(ChatColor.RED + "Usage: /fxutils <subcommand>");
+                    player.sendMessage(getLangMessage("usage_fxutils"));
                     return true;
                 }
 
@@ -192,28 +231,30 @@ public final class FXItems extends JavaPlugin implements Listener {
                     case "cleararmor" -> {
                         AttributeInstance armorAttribute = player.getAttribute(Attribute.ARMOR);
                         if (armorAttribute != null) {
-                            armorAttribute.setBaseValue(0); // Reset armor points to 0
-                            player.sendMessage(ChatColor.GREEN + "Your armor points have been reset to 0!");
+                            armorAttribute.setBaseValue(0);
+                            player.sendMessage(getLangMessage("clear_armor_success"));
                         } else {
-                            player.sendMessage(ChatColor.RED + "Unable to reset armor points.");
+                            player.sendMessage(getLangMessage("clear_armor_fail"));
                         }
                     }
-                    default -> player.sendMessage(ChatColor.RED + "Unknown subcommand. Available: cleararmor");
+                    default -> player.sendMessage(getLangMessage("unknown_subcommand"));
                 }
+            }
+            case "fxhelp" -> {
+                sender.sendMessage(getHelpMessage().split("\n"));
+                return true;
             }
             case "nv", "nightvision" -> {
                 boolean hasNightVision = player.hasMetadata("night_vision");
 
                 if (hasNightVision) {
-                    // Disable night vision
                     player.removeMetadata("night_vision", FXItems.getInstance());
-                    player.removePotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION); // Remove night vision effect
-                    player.sendMessage(ChatColor.RED + "Night vision disabled.");
+                    player.removePotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION);
+                    player.sendMessage(getLangMessage("night_vision_disabled"));
                 } else {
-                    // Enable night vision
                     player.setMetadata("night_vision", new org.bukkit.metadata.FixedMetadataValue(FXItems.getInstance(), true));
-                    player.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false)); // Add night vision effect
-                    player.sendMessage(ChatColor.GREEN + "Night vision enabled.");
+                    player.addPotionEffect(new org.bukkit.potion.PotionEffect(org.bukkit.potion.PotionEffectType.NIGHT_VISION, Integer.MAX_VALUE, 0, false, false));
+                    player.sendMessage(getLangMessage("night_vision_enabled"));
                 }
                 return true;
             }
@@ -298,6 +339,9 @@ public final class FXItems extends JavaPlugin implements Listener {
                 if (args.length == 1) {
                     return List.of("cleararmor");
                 }
+            }
+            case "fxhelp" -> {
+                return List.of();
             }
         }
         return null;

@@ -16,9 +16,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.noctify.Main.FXItems;
 
 public class FXItem implements Listener {
 
@@ -30,7 +31,8 @@ public class FXItem implements Listener {
     }
 
     public void openMainMenu(Player player) {
-        Inventory menu = Bukkit.createInventory(null, 9 * 5, "§8§lFXItems");
+        String guiTitle = FXItems.getFxItemsGuiTitle(); // Use the value from Lang.yml
+        Inventory menu = Bukkit.createInventory(null, 9 * 5, guiTitle);
 
         // Fill edges with dark gray glass panes
         ItemStack glassPane = createGlassPane();
@@ -94,7 +96,8 @@ public class FXItem implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getView().getTitle().equals("§8§lFXItems")) {
+        String guiTitle = FXItems.getFxItemsGuiTitle(); // Use the value from Lang.yml
+        if (event.getView().getTitle().equals(guiTitle)) {
             event.setCancelled(true);
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.BLACK_STAINED_GLASS_PANE) {
                 Player player = (Player) event.getWhoClicked();
@@ -123,7 +126,6 @@ public class FXItem implements Listener {
                             if (registeredFood != null && CustomItemUtils.isCustomItem(clickedItem, registeredFood.getType(), registeredFood.getItemMeta().getDisplayName())) {
                                 String keyName = foodId;
                                 try {
-                                    // You may need to implement openFoodCraftingMenu in CraftingGUI
                                     new CraftingGUI(plugin).openFoodCraftingMenu(player, keyName);
                                 } catch (RecipeException e) {
                                     // Exception already sends the message to the player

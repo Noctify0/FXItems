@@ -1,0 +1,27 @@
+CraftingGUI:
+  fxitems_gui_title: "§8§lFXItems"
+
+Commands:
+  no_permission: "&cYou do not have permission to use this command!"
+  only_players: "&cOnly players can use this command!"
+  usage_fxgive: "&cUsage: /fxgive {player} {item} [count]"
+  usage_fxreload: "&cUsage: /fxreload [config|cooldowns]"
+  usage_fxutils: "&cUsage: /fxutils <subcommand>"
+  invalid_count: "&cInvalid count. Please provide a valid number."
+  count_positive: "&cCount must be a positive number."
+  config_reloaded: "&aConfig reloaded!"
+  cooldowns_reset: "&aAll cooldowns have been reset!"
+  invalid_argument: "&cInvalid argument. Use /fxreload [config|cooldowns]."
+  night_vision_enabled: "&aNight vision enabled."
+  night_vision_disabled: "&cNight vision disabled."
+  clear_armor_success: "&aYour armor points have been reset to 0!"
+  clear_armor_fail: "&cUnable to reset armor points."
+  unknown_subcommand: "&cUnknown subcommand. Available: cleararmor"
+  help_message: |
+    &6&lFXItems Help
+    &e/fxitems &7- Open the FXItems GUI
+    &e/fxgive <player> <item> [count] &7- Give a custom item
+    &e/fxreload [config|cooldowns] &7- Reload configs or reset cooldowns
+    &e/fxutils <subcommand> &7- Utility commands
+    &e/nv or /nightvision &7- Toggle night vision
+    &e/fxhelp &7- Show this help message

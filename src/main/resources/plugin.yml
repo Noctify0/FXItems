@@ -31,6 +31,9 @@ commands:
   fxitems:
     description: Opens the FXItems menu.
     usage: /fxitems
+  fxhelp:
+    description: Shows help for FXItems
+    usage: /fxhelp
 permissions:
   fxitems.nightvision:
     description: Allows the player to toggle night vision.

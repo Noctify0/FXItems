@@ -26,6 +26,8 @@ public final class FXItems extends JavaPlugin implements Listener {
     private static FXItems instance;
     private static String fxItemsGuiTitle;
     private FileConfiguration langConfig;
+    private File oneTimeCraftsFile;
+    private FileConfiguration oneTimeCraftsConfig;
 
     @Override
     public void onEnable() {
@@ -43,6 +45,12 @@ public final class FXItems extends JavaPlugin implements Listener {
             saveResource("Lang.yml", false);
         }
         langConfig = YamlConfiguration.loadConfiguration(langFile);
+
+        oneTimeCraftsFile = new File(getDataFolder(), "OneTimeCrafts.yml");
+        if (!oneTimeCraftsFile.exists()) {
+            saveResource("OneTimeCrafts.yml", false);
+        }
+        oneTimeCraftsConfig = YamlConfiguration.loadConfiguration(oneTimeCraftsFile);
 
         fxItemsGuiTitle = langConfig.getString("CraftingGUI.fxitems_gui_title", "§8§lFXItems");
 
@@ -64,7 +72,7 @@ public final class FXItems extends JavaPlugin implements Listener {
             getLogger().warning("ModelEngine is missing. Custom model projectiles in ProjectileUtils are disabled.");
         }
 
-        LegendaryItemCraftListener craftListener = new LegendaryItemCraftListener(this);
+        LegendaryItemCraftListener craftListener = new LegendaryItemCraftListener(this, oneTimeCraftsFile, oneTimeCraftsConfig);
         Bukkit.getPluginManager().registerEvents(craftListener, this);
         Bukkit.getPluginManager().registerEvents(new FXItemListener(), this);
         Bukkit.getPluginManager().registerEvents(new FXFoodListener(this), this);
@@ -85,6 +93,10 @@ public final class FXItems extends JavaPlugin implements Listener {
         getLogger().info("Custom items and behaviors registered successfully!");
         getLogger().info(ChatColor.GREEN + "FXItems has been enabled!");
     }
+
+    public File getOneTimeCraftsFile() { return oneTimeCraftsFile; }
+
+    public FileConfiguration getOneTimeCraftsConfig() { return oneTimeCraftsConfig; }
 
     public static String getFxItemsGuiTitle() { return fxItemsGuiTitle; }
 

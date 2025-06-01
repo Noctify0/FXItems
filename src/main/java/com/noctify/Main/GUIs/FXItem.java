@@ -96,16 +96,40 @@ public class FXItem implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        String guiTitle = FXItems.getFxItemsGuiTitle(); // Use the value from Lang.yml
+        String guiTitle = FXItems.getFxItemsGuiTitle();
         if (event.getView().getTitle().equals(guiTitle)) {
             event.setCancelled(true);
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.BLACK_STAINED_GLASS_PANE) {
                 Player player = (Player) event.getWhoClicked();
                 ItemStack clickedItem = event.getCurrentItem();
 
+                // Shift + Right Click to get item (admin only)
+                if (event.isShiftClick() && event.isRightClick() && player.hasPermission("fxitems.itemguiperm")) {
+                    // Check custom items
+                    for (String itemId : ItemRegistry.getItemIds()) {
+                        ItemStack registeredItem = ItemRegistry.getCustomItem(itemId);
+                        if (registeredItem != null && CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), registeredItem.getItemMeta().getDisplayName())) {
+                            player.getInventory().addItem(registeredItem.clone());
+                            player.sendMessage("§aYou have received the item: " + registeredItem.getItemMeta().getDisplayName());
+                            return;
+                        }
+                    }
+                    // Check custom foods
+                    for (String foodId : FoodRegistry.getFoodIds()) {
+                        ItemStack registeredFood = FoodRegistry.getFoodItem(foodId);
+                        if (registeredFood != null && CustomItemUtils.isCustomItem(clickedItem, registeredFood.getType(), registeredFood.getItemMeta().getDisplayName())) {
+                            player.getInventory().addItem(registeredFood.clone());
+                            player.sendMessage("§aYou have received the food: " + registeredFood.getItemMeta().getDisplayName());
+                            return;
+                        }
+                    }
+                    player.sendMessage("§cError: Item not found in the registry.");
+                    return;
+                }
+
+                // Left Click to view recipe
                 if (event.isLeftClick()) {
                     boolean found = false;
-                    // Check custom items
                     for (String itemId : ItemRegistry.getItemIds()) {
                         ItemStack registeredItem = ItemRegistry.getCustomItem(itemId);
                         if (registeredItem != null && CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), registeredItem.getItemMeta().getDisplayName())) {
@@ -119,7 +143,6 @@ public class FXItem implements Listener {
                             break;
                         }
                     }
-                    // Check custom foods if not found in items
                     if (!found) {
                         for (String foodId : FoodRegistry.getFoodIds()) {
                             ItemStack registeredFood = FoodRegistry.getFoodItem(foodId);

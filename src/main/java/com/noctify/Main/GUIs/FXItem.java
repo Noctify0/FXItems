@@ -87,9 +87,14 @@ public class FXItem implements Listener {
         List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
         // Remove any old right-click lore if present
         lore.remove("§eRight Click to get item");
-        if (!lore.contains("§eLeft Click to view Recipe")) {
-            lore.add("§eLeft Click to view Recipe");
+        // Remove any existing left-click line to avoid duplicates
+        lore.remove("§eLeft Click to view Recipe");
+
+        if (!lore.isEmpty()) {
+            lore.add(""); // Add a blank line after original lore
         }
+        lore.add("§eLeft Click to view Recipe");
+
         meta.setLore(lore);
         item.setItemMeta(meta);
     }

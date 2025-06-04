@@ -32,7 +32,7 @@ public class FXItem implements Listener {
     }
 
     public void openMainMenu(Player player) {
-        String guiTitle = FXItems.getFxItemsGuiTitle(); // Use the value from Lang.yml
+        String guiTitle = FXItems.getFxItemsGuiTitle();
         Inventory menu = Bukkit.createInventory(null, 9 * 5, guiTitle);
 
         // Fill edges with dark gray glass panes
@@ -60,8 +60,19 @@ public class FXItem implements Listener {
         for (String foodId : FoodRegistry.getFoodIds()) {
             ItemStack food = FoodRegistry.getFoodItem(foodId);
             if (food != null) {
-                addLoreToItem(food, player); // Reuse the same lore helper
+                addLoreToItem(food, player);
                 menu.setItem(index, food);
+                index++;
+                if (index % 9 == 8) index += 2; // Skip edges
+            }
+        }
+
+        // Add registered armors
+        for (String armorId : com.noctify.Custom.ArmorRegistry.getArmorIds()) {
+            ItemStack armor = com.noctify.Custom.ArmorRegistry.getCustomArmor(armorId);
+            if (armor != null) {
+                addLoreToItem(armor, player);
+                menu.setItem(index, armor);
                 index++;
                 if (index % 9 == 8) index += 2; // Skip edges
             }
@@ -81,19 +92,27 @@ public class FXItem implements Listener {
     }
 
     private void addLoreToItem(ItemStack item, Player player) {
+        // Clone the item to avoid modifying the original reference
         ItemMeta meta = item.getItemMeta();
         if (meta == null) return;
 
         List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
-        // Remove any old right-click lore if present
+        // Remove any old right-click/left-click lore if present
         lore.remove("§eRight Click to get item");
-        // Remove any existing left-click line to avoid duplicates
         lore.remove("§eLeft Click to view Recipe");
 
-        if (!lore.isEmpty()) {
-            lore.add(""); // Add a blank line after original lore
+        // Only add if not already present and limit total lines
+        if (!lore.contains("§eLeft Click to view Recipe") && lore.size() < 255) {
+            if (!lore.isEmpty()) {
+                lore.add(""); // Add a blank line after original lore
+            }
+            lore.add("§eLeft Click to view Recipe");
         }
-        lore.add("§eLeft Click to view Recipe");
+
+        // Ensure lore does not exceed 256 lines
+        if (lore.size() > 256) {
+            lore = lore.subList(0, 256);
+        }
 
         meta.setLore(lore);
         item.setItemMeta(meta);
@@ -122,32 +141,36 @@ public class FXItem implements Listener {
         Player player = (Player) event.getWhoClicked();
         event.setCancelled(true);
 
-        // Only show recipe, never give item
-        boolean found = false;
+        // Check custom items
         for (String itemId : ItemRegistry.getItemIds()) {
             ItemStack registeredItem = ItemRegistry.getCustomItem(itemId);
             if (registeredItem != null && CustomItemUtils.isCustomItem(clickedItem, registeredItem.getType(), registeredItem.getItemMeta().getDisplayName())) {
                 try {
                     new CraftingGUI(plugin).openCraftingMenu(player, itemId);
                 } catch (RecipeException e) {}
-                found = true;
-                break;
+                return;
             }
         }
-        if (!found) {
-            for (String foodId : FoodRegistry.getFoodIds()) {
-                ItemStack registeredFood = FoodRegistry.getFoodItem(foodId);
-                if (registeredFood != null && CustomItemUtils.isCustomItem(clickedItem, registeredFood.getType(), registeredFood.getItemMeta().getDisplayName())) {
-                    try {
-                        new CraftingGUI(plugin).openFoodCraftingMenu(player, foodId);
-                    } catch (RecipeException e) {}
-                    found = true;
-                    break;
-                }
+        // Check custom foods
+        for (String foodId : FoodRegistry.getFoodIds()) {
+            ItemStack registeredFood = FoodRegistry.getFoodItem(foodId);
+            if (registeredFood != null && CustomItemUtils.isCustomItem(clickedItem, registeredFood.getType(), registeredFood.getItemMeta().getDisplayName())) {
+                try {
+                    new CraftingGUI(plugin).openFoodCraftingMenu(player, foodId);
+                } catch (RecipeException e) {}
+                return;
             }
         }
-        if (!found) {
-            player.sendMessage("§cError: Item not found in the registry.");
+        // Check custom armors
+        for (String armorId : com.noctify.Custom.ArmorRegistry.getArmorIds()) {
+            ItemStack registeredArmor = com.noctify.Custom.ArmorRegistry.getCustomArmor(armorId);
+            if (registeredArmor != null && CustomItemUtils.isCustomItem(clickedItem, registeredArmor.getType(), registeredArmor.getItemMeta().getDisplayName())) {
+                try {
+                    new CraftingGUI(plugin).openArmorCraftingMenu(player, armorId);
+                } catch (RecipeException e) {}
+                return;
+            }
         }
+        player.sendMessage("§cError: Item not found in the registry.");
     }
 }

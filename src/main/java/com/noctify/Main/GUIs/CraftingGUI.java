@@ -141,6 +141,50 @@ public class CraftingGUI implements Listener {
         player.openInventory(menu);
     }
 
+    public void openArmorCraftingMenu(Player player, String armorId) throws RecipeException {
+        var def = com.noctify.Custom.ArmorRegistry.getArmorDefinition(armorId);
+        if (def == null || def.recipe == null) {
+            throw new RecipeException(player, "No recipe found for armor: " + armorId);
+        }
+
+        String displayName = def.displayName != null ? def.displayName : armorId;
+        displayName = org.bukkit.ChatColor.stripColor(displayName);
+
+        Inventory menu = Bukkit.createInventory(null, 45, "§8§l" + displayName + "§8§l's Recipe");
+
+        ItemStack glassPane = createGlassPane();
+        for (int i = 0; i < 45; i++) {
+            menu.setItem(i, glassPane);
+        }
+
+        int[] craftingSlots = {11, 12, 13, 20, 21, 22, 29, 30, 31};
+        for (int i = 0; i < Math.min(9, def.recipe.ingredients.size()); i++) {
+            ItemStack ingredient = def.recipe.ingredients.get(i);
+            if (ingredient != null && ingredient.getType() != Material.AIR) {
+                menu.setItem(craftingSlots[i], ingredient.clone());
+            } else {
+                menu.setItem(craftingSlots[i], null);
+            }
+        }
+
+        ItemStack result = com.noctify.Custom.ArmorRegistry.getCustomArmor(armorId);
+        if (result != null) {
+            result = result.clone();
+            result.setAmount(def.recipe.amount);
+        }
+        menu.setItem(24, result);
+
+        ItemStack closeArrow = new ItemStack(Material.ARROW);
+        ItemMeta arrowMeta = closeArrow.getItemMeta();
+        if (arrowMeta != null) {
+            arrowMeta.setDisplayName("§c§lBack");
+            closeArrow.setItemMeta(arrowMeta);
+        }
+        menu.setItem(44, closeArrow);
+
+        player.openInventory(menu);
+    }
+
     private ItemStack createGlassPane() {
         ItemStack glassPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
         ItemMeta meta = glassPane.getItemMeta();

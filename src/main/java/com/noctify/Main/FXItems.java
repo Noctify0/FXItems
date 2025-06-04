@@ -63,6 +63,7 @@ public final class FXItems extends JavaPlugin implements Listener {
         CommandRegistry.initialize(this);
         EventRegistry.initialize(this);
         FoodRegistry.initialize(this);
+        ArmorRegistry.initialize(this);
 
         if (!EntitySizeUtils.ENABLED) {
             getLogger().warning("EntitySizeUtils is disabled because the EntitySize plugin is missing.");
@@ -76,6 +77,7 @@ public final class FXItems extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(craftListener, this);
         Bukkit.getPluginManager().registerEvents(new FXItemListener(), this);
         Bukkit.getPluginManager().registerEvents(new FXFoodListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new FXArmorListener(), this);
 
         // Register command executors and tab completers
         getCommand("fxgive").setExecutor(this);
@@ -213,7 +215,10 @@ public final class FXItems extends JavaPlugin implements Listener {
                     baseItem = FoodRegistry.getFoodItem(itemId);
                 }
                 if (baseItem == null) {
-                    player.sendMessage(ChatColor.RED + "Item or food with ID '" + itemId + "' not found!");
+                    baseItem = ArmorRegistry.getCustomArmor(itemId);
+                }
+                if (baseItem == null) {
+                    player.sendMessage(ChatColor.RED + "Item, food, or armor with ID '" + itemId + "' not found!");
                     return true;
                 }
 
@@ -332,12 +337,13 @@ public final class FXItems extends JavaPlugin implements Listener {
                     Bukkit.getOnlinePlayers().forEach(player -> suggestions.add(player.getName()));
                     return suggestions;
                 } else if (args.length == 2) {
-                    // Suggest both custom item IDs and custom food IDs
                     Set<String> suggestions = new HashSet<>();
                     suggestions.addAll(ItemRegistry.getItemIds());
                     suggestions.addAll(FoodRegistry.getFoodIds());
+                    suggestions.addAll(ArmorRegistry.getArmorIds()); // Add this line
                     return new ArrayList<>(suggestions);
-                } else if (args.length == 3) {
+                }
+                else if (args.length == 3) {
                     // Suggest common counts
                     return List.of("1", "10", "64");
                 }

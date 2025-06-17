@@ -1,4 +1,3 @@
-// src/main/java/com/noctify/Main/Registration/FXArmorDefinition.java
 package com.noctify.Main.Registration;
 
 import java.util.List;
@@ -13,13 +12,11 @@ public class FXArmorDefinition {
     public final int durability;
     public final FXArmorBehavior behavior;
     public final Integer customModelData;
-    public final boolean oneTimeCraft;
     public final boolean unbreakable;
     public final boolean hideFlags;
+    public final boolean glowing;
     public final List<String> lore;
     public final FXItemRecipe recipe;
-    public final int amount;
-    public final boolean shaped;
 
     public FXArmorDefinition(
             String id,
@@ -27,31 +24,27 @@ public class FXArmorDefinition {
             ArmorType type,
             ArmorMaterial material,
             int armorPoints,
+            Integer customModelData,
             int durability,
             FXArmorBehavior behavior,
-            Integer customModelData,
-            boolean oneTimeCraft,
             boolean unbreakable,
             boolean hideFlags,
+            boolean glowing,
             List<String> lore,
-            FXItemRecipe recipe,
-            int amount,
-            boolean shaped
+            FXItemRecipe recipe
     ) {
         this.id = id;
         this.displayName = displayName;
         this.type = type;
         this.material = material;
         this.armorPoints = armorPoints;
+        this.customModelData = customModelData;
         this.durability = durability;
         this.behavior = behavior;
-        this.customModelData = customModelData;
-        this.oneTimeCraft = oneTimeCraft;
         this.unbreakable = unbreakable;
         this.hideFlags = hideFlags;
+        this.glowing = glowing;
         this.lore = lore;
         this.recipe = recipe;
-        this.amount = amount;
-        this.shaped = shaped;
     }
 }

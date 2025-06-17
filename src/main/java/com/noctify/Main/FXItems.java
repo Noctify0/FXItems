@@ -3,11 +3,9 @@ package com.noctify.Main;
 import com.maximde.entitysize.EntitySize;
 import com.noctify.Custom.*;
 import com.noctify.Main.Listeners.*;
-import com.noctify.Main.Utils.EntitySizeUtils;
-import com.noctify.Main.Utils.ProjectileUtils;
+import com.noctify.Main.Utils.*;
 import org.bukkit.*;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.*;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -64,6 +62,7 @@ public final class FXItems extends JavaPlugin implements Listener {
         EventRegistry.initialize(this);
         FoodRegistry.initialize(this);
         ArmorRegistry.initialize(this);
+        BiomeRegistry.initialize();
 
         if (!EntitySizeUtils.ENABLED) {
             getLogger().warning("EntitySizeUtils is disabled because the EntitySize plugin is missing.");
@@ -78,6 +77,7 @@ public final class FXItems extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new FXItemListener(), this);
         Bukkit.getPluginManager().registerEvents(new FXFoodListener(this), this);
         Bukkit.getPluginManager().registerEvents(new FXArmorListener(), this);
+        Bukkit.getPluginManager().registerEvents(new BiomeListener(this), this);
 
         // Register command executors and tab completers
         getCommand("fxgive").setExecutor(this);
@@ -91,6 +91,8 @@ public final class FXItems extends JavaPlugin implements Listener {
         getCommand("fxitems").setExecutor(this);
         getCommand("fxhelp").setExecutor(this);
         getCommand("fxhelp").setTabCompleter(this);
+        getCommand("fxbiomes").setExecutor(new com.noctify.Main.Commands.FXBiomesCommand(this));
+        getCommand("fxlocate").setExecutor(new com.noctify.Main.Commands.FXLocateCommand());
 
         getLogger().info("Custom items and behaviors registered successfully!");
         getLogger().info(ChatColor.GREEN + "FXItems has been enabled!");

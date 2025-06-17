@@ -24,26 +24,29 @@ public class ArmorRegistry {
                 ArmorType.HELMET,
                 ArmorMaterial.DIAMOND,
                 3,
+                null,
                 400,
                 new ExampleArmorBehavior(),
-                null,
                 true,
-                true,
+                false,
                 true,
                 Arrays.asList("§7A legendary helmet.", "§fSpecial Ability: Example!"),
-                new FXItemRecipe(Arrays.asList(
-                        new ItemStack(Material.AIR),
-                        new ItemStack(Material.EMERALD),
-                        new ItemStack(Material.AIR),
-                        new ItemStack(Material.DIAMOND_BLOCK),
-                        new ItemStack(Material.AIR),
-                        new ItemStack(Material.DIAMOND_BLOCK),
-                        new ItemStack(Material.AIR),
-                        new ItemStack(Material.AIR),
-                        new ItemStack(Material.AIR)
-                ), true, 1, true),
-                1,
-                true
+                new FXItemRecipe(
+                        Arrays.asList(
+                                new ItemStack(Material.AIR),
+                                new ItemStack(Material.EMERALD),
+                                new ItemStack(Material.AIR),
+                                new ItemStack(Material.DIAMOND_BLOCK),
+                                new ItemStack(Material.AIR),
+                                new ItemStack(Material.DIAMOND_BLOCK),
+                                new ItemStack(Material.AIR),
+                                new ItemStack(Material.AIR),
+                                new ItemStack(Material.AIR)
+                        ),
+                        true,
+                        1,
+                        true
+                )
         ));
     }
 
@@ -90,7 +93,7 @@ public class ArmorRegistry {
 
     private static ItemStack createItemStackFromDefinition(FXArmorDefinition def) {
         Material mat = getBukkitMaterial(def.type, def.material);
-        ItemStack item = new ItemStack(mat, def.amount);
+        ItemStack item = new ItemStack(mat, 1); // Always 1, or set as needed
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
             meta.setDisplayName(def.displayName);
@@ -100,7 +103,6 @@ public class ArmorRegistry {
             // Optionally hide flags, etc.
             item.setItemMeta(meta);
         }
-        // Set durability if needed (for legacy versions)
         return item;
     }
 

@@ -2,7 +2,7 @@ name: FXItems
 softdepend:
   - EntitySize
   - ModelEngine
-version: 'v1.2'
+version: 'v1.3'
 main: com.noctify.Main.FXItems
 api-version: '1.21'
 authors: [ zfxm, noctify ]
@@ -34,6 +34,14 @@ commands:
   fxhelp:
     description: Shows help for FXItems
     usage: /fxhelp
+  fxlocate:
+    usage: /fxlocate <biome_id>
+    description: Locate the nearest custom biome
+    default: op
+  fxbiomes:
+    usage: /fxbiomes
+    description: View all custom biomes
+    default: true
 permissions:
   fxitems.nightvision:
     description: Allows the player to toggle night vision.
